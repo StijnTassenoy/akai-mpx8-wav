@@ -64,6 +64,23 @@ class MainWindow(QMainWindow):
 
     def save_sound(self):
         print("save sound")
+        index = self.right_pane.currentIndex()
+
+        # Get the corresponding soundeffect object
+        soundeffect = self.soundeffect_list[index.row()]
+
+        # Get the current values in the inputboxes
+        output_name = self.current_edit_pane.findChild(QLineEdit, "output_name_input").text()
+        start_time = self.current_edit_pane.findChild(QLineEdit, "start_time_input").text()
+        end_time = self.current_edit_pane.findChild(QLineEdit, "end_time_input").text()
+
+        # Update the soundeffect object with the current values in the inputboxes
+        soundeffect.output_name = output_name
+        soundeffect.start_time = start_time
+        soundeffect.end_time = end_time
+
+        # Save the soundeffect object
+        soundeffect.save()
 
     def _setup_pane_layout(self):
         self.pane_layout = QHBoxLayout()
