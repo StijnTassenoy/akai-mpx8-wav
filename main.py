@@ -22,24 +22,21 @@ class MainWindow(QMainWindow):
         self._setup_right_pane()
 
         # Create a start batch button
-        self.start_batch_button = QPushButton('Start Batch')
+        self.start_batch_button = QPushButton("Start Batch")
         self.start_batch_button.setEnabled(False)  # Disable button by default
         self.start_batch_button.clicked.connect(self.start_batch)
 
         self._setup_pane_layout()
 
         self.current_edit_pane = None
-        self._setup_edit_pane()
 
         # Create a layout for the bottom part of the window
         bottom_layout = QHBoxLayout()
-        bottom_layout.addWidget(self.start_batch_button)
         bottom_layout.addStretch()
 
         # Create a layout for the main window
         self.main_layout = QVBoxLayout()
         self.main_layout.addLayout(self.pane_layout)
-        self.main_layout.addWidget(self.edit_pane)
         self.main_layout.addLayout(bottom_layout)
 
         # Create a central widget and set the main layout
@@ -62,23 +59,11 @@ class MainWindow(QMainWindow):
         self.right_pane.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.right_pane.setStyleSheet(right_pane_style)
         self.right_pane.clicked.connect(self.show_edit_pane)
-        # Create a model for the right pane
         self.model = QStandardItemModel(self.right_pane)
-        # Set the model for the right pane
         self.right_pane.setModel(self.model)
 
-    def _setup_edit_pane(self):
-        # Create a layout for the edit pane
-        edit_layout = QFormLayout()
-        self.output_name_edit = QLineEdit()
-        self.cut_from_edit = QLineEdit()
-        self.cut_to_edit = QLineEdit()
-        edit_layout.addRow(QLabel("Name:"), self.output_name_edit)
-        edit_layout.addRow(QLabel("Cut from:"), self.cut_from_edit)
-        edit_layout.addRow(QLabel("Cut to:"), self.cut_to_edit)
-        self.edit_pane = QWidget()
-        self.edit_pane.setLayout(edit_layout)
-        self.edit_pane.hide()
+    def save_sound(self):
+        print("save sound")
 
     def _setup_pane_layout(self):
         self.pane_layout = QHBoxLayout()
@@ -143,37 +128,20 @@ class MainWindow(QMainWindow):
         # Hide the currently shown edit pane, if any
         if self.current_edit_pane is not None:
             self.current_edit_pane.hide()
-
-        # Create a new edit pane
         self.current_edit_pane = QWidget()
+        save_button = QPushButton("Save")
+        save_button.clicked.connect(self.save_sound)
         edit_layout = QFormLayout()
-
-        # Get the selected item's name
         name = self.model.itemFromIndex(index).text()
-
-        # Create a label with the name
-        label_name = QLabel(name)
-        edit_layout.addRow("Name:", label_name)
-
-        # Create an input box for the output name
-        output_name_input = QLineEdit()
-        edit_layout.addRow("Output Name:", output_name_input)
-
-        # Create an input box for the starting time
-        start_time_input = QLineEdit()
-        edit_layout.addRow("Start Time:", start_time_input)
-
-        # Create an input box for the ending time
-        end_time_input = QLineEdit()
-        edit_layout.addRow("End Time:", end_time_input)
+        edit_layout.addRow("Name:", QLabel(name))
+        edit_layout.addRow("Output Name:", QLineEdit())
+        edit_layout.addRow("Start Time:", QLineEdit())
+        edit_layout.addRow("End Time:", QLineEdit())
+        edit_layout.addRow(save_button)
 
         # Set the layout for the edit pane
         self.current_edit_pane.setLayout(edit_layout)
-
-        # Add the edit pane to the main layout, to the right of the right pane
         self.main_layout.addWidget(self.current_edit_pane)
-
-        # Show the edit pane
         self.current_edit_pane.show()
 
 
