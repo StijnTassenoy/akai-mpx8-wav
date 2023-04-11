@@ -2,7 +2,7 @@ import os
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QStandardItem, QStandardItemModel
 from PyQt5.QtWidgets import QApplication, QMainWindow, QListView, QAbstractItemView, QLabel, QWidget, \
-    QVBoxLayout, QHBoxLayout, QFormLayout, QLineEdit
+    QVBoxLayout, QHBoxLayout, QFormLayout, QLineEdit, QPushButton
 from PyQt5 import QtGui
 
 from helpers.stylesheets import right_pane_style
@@ -21,16 +21,26 @@ class MainWindow(QMainWindow):
         self._setup_left_pane()
         self._setup_right_pane()
 
+        # Create a start batch button
+        self.start_batch_button = QPushButton('Start Batch')
+        self.start_batch_button.setEnabled(False)  # Disable button by default
+        self.start_batch_button.clicked.connect(self.start_batch)
+
         self._setup_pane_layout()
 
         self.current_edit_pane = None
         self._setup_edit_pane()
 
+        # Create a layout for the bottom part of the window
+        bottom_layout = QHBoxLayout()
+        bottom_layout.addWidget(self.start_batch_button)
+        bottom_layout.addStretch()
 
         # Create a layout for the main window
         self.main_layout = QVBoxLayout()
         self.main_layout.addLayout(self.pane_layout)
         self.main_layout.addWidget(self.edit_pane)
+        self.main_layout.addLayout(bottom_layout)
 
         # Create a central widget and set the main layout
         central_widget = QWidget()
@@ -75,11 +85,27 @@ class MainWindow(QMainWindow):
         self.pane_layout.addWidget(self.left_pane)
         self.pane_layout.addWidget(self.right_pane)
 
+        # Create vertical layout for the start button
+        button_layout = QVBoxLayout()
+        button_layout.addStretch()
+        button_layout.addWidget(self.start_batch_button)
+
+        # Create a top-level layout for the panes and button
+        top_layout = QVBoxLayout()
+        top_layout.addLayout(self.pane_layout)
+        top_layout.addLayout(button_layout)
+
+        self.pane_layout = top_layout
+
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls():
             event.accept()
         else:
             event.ignore()
+
+    def _update_start_batch_button(self):
+        # Enable the start batch button if there is at least one item in the list
+        self.start_batch_button.setEnabled(len(self.soundeffect_list) > 0)
 
     def dropEvent(self, event):
         for url in event.mimeData().urls():
@@ -92,6 +118,25 @@ class MainWindow(QMainWindow):
                     self.model.appendRow(item)
                     soundeffect = SoundEffect(source_path=path, output_path="", output_name="")
                     self.soundeffect_list.append(soundeffect)
+                    self._update_start_batch_button()  # Call this method to update the button state
+
+    def start_batch(self):
+        # This method will be called when the Start Batch button is clicked
+        print('Start Batch button clicked!')
+
+    def dropEvent(self, event):
+        for url in event.mimeData().urls():
+            path = url.toLocalFile()
+            extension = path.rsplit(".", 1)[1]
+            if os.path.isfile(path) and extension.lower() in ("wav", "mp3", "opus"):
+                if path not in self.file_list:
+                    self.file_list.append(path)
+                    item = QStandardItem(os.path.basename(path))
+                    self.model.appendRow(item)
+                    soundeffect = SoundEffect(source_path=path, output_path="", output_name="")
+                    self.soundeffect_list.append(soundeffect)
+                    if len(self.file_list) > 0:
+                        self.start_batch_button.setEnabled(True)
         print(self.soundeffect_list)
 
     def show_edit_pane(self, index):
