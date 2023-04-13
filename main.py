@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QListView, QAbstractItemV
     QVBoxLayout, QHBoxLayout, QFormLayout, QLineEdit, QPushButton
 from PyQt5 import QtGui
 
+from helpers.ffmpeg_helpers import edit_audio
 from helpers.stylesheets import right_pane_style
 from models.sound_effect import SoundEffect
 
@@ -111,7 +112,7 @@ class MainWindow(QMainWindow):
         for url in event.mimeData().urls():
             path = url.toLocalFile()
             extension = path.rsplit(".", 1)[1]
-            if os.path.isfile(path) and extension.lower() in ("wav", "mp3", "opus"):
+            if os.path.isfile(path) and extension.lower() in ("wav", "mp3", "opus", "ogg"):
                 if path not in self.file_list:
                     self.file_list.append(path)
                     item = QStandardItem(os.path.basename(path))
@@ -122,7 +123,9 @@ class MainWindow(QMainWindow):
 
     def start_batch(self):
         # This method will be called when the Start Batch button is clicked
-        print('Start Batch button clicked!')
+        print("Start Batch button clicked!")
+        for se in self.soundeffect_list:
+            edit_audio(float(se.start_time), float(se.end_time), se.source_path, se.generate_output_path())
 
     def dropEvent(self, event):
         for url in event.mimeData().urls():
