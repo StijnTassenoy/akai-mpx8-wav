@@ -1,4 +1,5 @@
 # Python Imports #
+import json
 from dataclasses import dataclass
 
 
@@ -7,5 +8,6 @@ class SoundEffect:
     source_path: str
     output_path: str
     output_name: str
-    cut_from: int = None
-    cut_to: int = None
+    start_time: int = None
+    end_time: int = None
+

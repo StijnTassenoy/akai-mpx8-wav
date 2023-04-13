@@ -63,7 +63,6 @@ class MainWindow(QMainWindow):
         self.right_pane.setModel(self.model)
 
     def save_sound(self):
-        print("save sound")
         index = self.right_pane.currentIndex()
 
         # Get the corresponding soundeffect object
@@ -79,8 +78,7 @@ class MainWindow(QMainWindow):
         soundeffect.start_time = start_time
         soundeffect.end_time = end_time
 
-        # Save the soundeffect object
-        soundeffect.save()
+        print(f"Saved: {soundeffect}")
 
     def _setup_pane_layout(self):
         self.pane_layout = QHBoxLayout()
@@ -143,6 +141,7 @@ class MainWindow(QMainWindow):
 
     def show_edit_pane(self, index):
         # Hide the currently shown edit pane, if any
+        soundeffect = self.soundeffect_list[index.row()]
         if self.current_edit_pane is not None:
             self.current_edit_pane.hide()
         self.current_edit_pane = QWidget()
@@ -151,9 +150,18 @@ class MainWindow(QMainWindow):
         edit_layout = QFormLayout()
         name = self.model.itemFromIndex(index).text()
         edit_layout.addRow("Name:", QLabel(name))
-        edit_layout.addRow("Output Name:", QLineEdit())
-        edit_layout.addRow("Start Time:", QLineEdit())
-        edit_layout.addRow("End Time:", QLineEdit())
+        output_name_input = QLineEdit()
+        output_name_input.setObjectName("output_name_input")
+        output_name_input.setText(str(soundeffect.output_name) if soundeffect.output_name else "")
+        edit_layout.addRow("Output Name:", output_name_input)
+        start_time_input = QLineEdit()
+        start_time_input.setObjectName("start_time_input")
+        start_time_input.setText(str(soundeffect.start_time) if soundeffect.start_time else "")
+        edit_layout.addRow("Start Time:", start_time_input)
+        end_time_input = QLineEdit()
+        end_time_input.setObjectName("end_time_input")
+        end_time_input.setText(str(soundeffect.end_time) if soundeffect.end_time else "")
+        edit_layout.addRow("End Time:", end_time_input)
         edit_layout.addRow(save_button)
 
         # Set the layout for the edit pane
