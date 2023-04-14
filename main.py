@@ -6,6 +6,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QListView, QAbstractItemV
 from PyQt5 import QtGui
 
 from helpers.ffmpeg_helpers import edit_audio
+from helpers.helpers import validate_float_input, strip_empty_to_none
 from helpers.stylesheets import right_pane_style
 from models.sound_effect import SoundEffect
 
@@ -76,8 +77,13 @@ class MainWindow(QMainWindow):
 
         # Update the soundeffect object with the current values in the inputboxes
         soundeffect.output_name = output_name
-        soundeffect.start_time = start_time
-        soundeffect.end_time = end_time
+        start_time = strip_empty_to_none(start_time)
+        end_time = strip_empty_to_none(end_time)
+
+        if validate_float_input(start_time, "Start-time"):
+            soundeffect.start_time = start_time
+        if validate_float_input(end_time, "End-time"):
+            soundeffect.end_time = end_time
 
         print(f"Saved: {soundeffect}")
 
@@ -125,7 +131,7 @@ class MainWindow(QMainWindow):
         # This method will be called when the Start Batch button is clicked
         print("Start Batch button clicked!")
         for se in self.soundeffect_list:
-            edit_audio(float(se.start_time), float(se.end_time), se.source_path, se.generate_output_path())
+            edit_audio(se.start_time, se.end_time, se.source_path, se.generate_output_path())
 
     def dropEvent(self, event):
         for url in event.mimeData().urls():
