@@ -21,6 +21,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("AKAI MPX8 Manager")
         self.setWindowIcon(QtGui.QIcon("images/logo.png"))
         self._setup_left_pane()
+        self._setup_left_yt_input()
         self._setup_right_pane()
 
         # Create a start batch button
@@ -51,9 +52,16 @@ class MainWindow(QMainWindow):
         self.left_pane.setAcceptDrops(True)
         self.left_pane.setAlignment(Qt.AlignCenter)
         self.left_pane.setStyleSheet("QLabel { border: 2px dashed gray; }")
-        self.left_pane.setMinimumSize(200, 300)
+        self.left_pane.setMinimumSize(200, 280)
         self.left_pane.dragEnterEvent = self.dragEnterEvent
         self.left_pane.dropEvent = self.dropEvent
+
+    def _setup_left_yt_input(self):
+        self.yt_input = QLineEdit()
+        self.yt_input.setObjectName("yt_input")
+        self.yt_input.setPlaceholderText("Enter YouTube link")
+        self.yt_add_button = QPushButton("Add Youtube Link")
+        self.yt_add_button.clicked.connect(self.add_yt)
 
     def _setup_right_pane(self):
         self.right_pane = QListView()
@@ -63,6 +71,30 @@ class MainWindow(QMainWindow):
         self.right_pane.clicked.connect(self.show_edit_pane)
         self.model = QStandardItemModel(self.right_pane)
         self.right_pane.setModel(self.model)
+
+    def _setup_pane_layout(self):
+        # Create vertical layout for left pane and input field
+        left_layout = QVBoxLayout()
+        left_layout.addWidget(self.left_pane)
+        left_layout.addWidget(self.yt_input)
+        left_layout.addWidget(self.yt_add_button)
+
+        # Create vertical layout for the start button
+        button_layout = QVBoxLayout()
+        button_layout.addStretch()
+        button_layout.addWidget(self.start_batch_button)
+
+        # Create a horizontal layout for the left pane and right pane
+        pane_layout = QHBoxLayout()
+        pane_layout.addLayout(left_layout)
+        pane_layout.addWidget(self.right_pane)
+
+        # Create a top-level layout for the panes and button
+        top_layout = QVBoxLayout()
+        top_layout.addLayout(pane_layout)
+        top_layout.addLayout(button_layout)
+
+        self.pane_layout = top_layout
 
     def save_sound(self):
         index = self.right_pane.currentIndex()
@@ -87,23 +119,6 @@ class MainWindow(QMainWindow):
 
         print(f"Saved: {soundeffect}")
 
-    def _setup_pane_layout(self):
-        self.pane_layout = QHBoxLayout()
-        self.pane_layout.addWidget(self.left_pane)
-        self.pane_layout.addWidget(self.right_pane)
-
-        # Create vertical layout for the start button
-        button_layout = QVBoxLayout()
-        button_layout.addStretch()
-        button_layout.addWidget(self.start_batch_button)
-
-        # Create a top-level layout for the panes and button
-        top_layout = QVBoxLayout()
-        top_layout.addLayout(self.pane_layout)
-        top_layout.addLayout(button_layout)
-
-        self.pane_layout = top_layout
-
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls():
             event.accept()
@@ -126,6 +141,10 @@ class MainWindow(QMainWindow):
                     soundeffect = SoundEffect(source_path=path, output_path="", output_name="")
                     self.soundeffect_list.append(soundeffect)
                     self._update_start_batch_button()  # Call this method to update the button state
+
+    def add_yt(self):
+        # This method will be called when the Start Batch button is clicked
+        print("YT Add button clicked!")
 
     def start_batch(self):
         # This method will be called when the Start Batch button is clicked
