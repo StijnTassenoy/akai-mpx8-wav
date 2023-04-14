@@ -2,7 +2,7 @@ import os
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QStandardItem, QStandardItemModel
 from PyQt5.QtWidgets import QApplication, QMainWindow, QListView, QAbstractItemView, QLabel, QWidget, \
-    QVBoxLayout, QHBoxLayout, QFormLayout, QLineEdit, QPushButton
+    QVBoxLayout, QHBoxLayout, QFormLayout, QLineEdit, QPushButton, QMessageBox
 from PyQt5 import QtGui
 
 from helpers.ffmpeg_helpers import edit_audio
@@ -143,8 +143,17 @@ class MainWindow(QMainWindow):
                     self._update_start_batch_button()  # Call this method to update the button state
 
     def add_yt(self):
-        # This method will be called when the Start Batch button is clicked
-        print("YT Add button clicked!")
+        if "youtube.com/watch?v=" in self.yt_input.text():
+            name = self.yt_input.text().split("/watch?v=")[1]
+            if "&" in name:
+                name = name.split("&")[0]
+            item = QStandardItem(name)
+            self.model.appendRow(item)
+            soundeffect = SoundEffect(source_path=self.yt_input.text(), output_path="./_output", output_name=name)
+            self.soundeffect_list.append(soundeffect)
+            self._update_start_batch_button()
+        else:
+            QMessageBox.warning(None, "Error", f"Not a valid YouTube URL.")
 
     def start_batch(self):
         # This method will be called when the Start Batch button is clicked
