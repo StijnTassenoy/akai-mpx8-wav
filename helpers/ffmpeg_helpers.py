@@ -23,7 +23,7 @@ def edit_audio(start_time: float | None, end_time: float | None, input_file: str
         cmd += ["-ss", str(start_time)]
     if end_time is not None:
         cmd += ["-to", str(end_time)]
-    cmd += ["-c", "copy", output_file]
+    cmd += ["-c:a", "pcm_s16le", "-ar", "44100", "-ac", "2", output_file]
 
     # Run the ffmpeg command
     subprocess.run(cmd)
