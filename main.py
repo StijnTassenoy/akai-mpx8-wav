@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QListView, QAbstractItemV
 from PyQt5 import QtGui
 
 from helpers.ffmpeg_helpers import edit_audio
-from helpers.helpers import validate_float_input, strip_empty_to_none
+from helpers.helpers import validate_float_input, strip_empty_to_none, ytdl_download_soundtrack
 from helpers.stylesheets import right_pane_style
 from models.sound_effect import SoundEffect
 
@@ -159,6 +159,9 @@ class MainWindow(QMainWindow):
         # This method will be called when the Start Batch button is clicked
         print("Start Batch button clicked!")
         for se in self.soundeffect_list:
+            if "youtube" in se.source_path:
+                yt_location = ytdl_download_soundtrack(se.source_path)
+                se.source_path = yt_location
             edit_audio(se.start_time, se.end_time, se.source_path, se.generate_output_path())
 
     def dropEvent(self, event):

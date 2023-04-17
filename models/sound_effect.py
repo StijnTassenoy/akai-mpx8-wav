@@ -21,4 +21,6 @@ class SoundEffect:
         output_file_path = os.path.join(self.output_path, output_file_name)
         if not output_file_path.endswith(".wav"):
             output_file_path += ".wav"
+        if "\\_temp\\" in output_file_path:
+            output_file_path = output_file_path.replace("_temp\\", "")
         return output_file_path

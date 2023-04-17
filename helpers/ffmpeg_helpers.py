@@ -1,5 +1,7 @@
 import subprocess
 
+from helpers.helpers import ytdl_download_soundtrack
+
 
 def edit_audio(start_time: float | None, end_time: float | None, input_file: str, output_file: str):
     # Use ffprobe to get the duration of the input file
