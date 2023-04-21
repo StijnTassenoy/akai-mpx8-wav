@@ -16,6 +16,13 @@ def validate_float_input(ipt: str, inputname: str) -> bool:
         return False
 
 
+def validate_start_end_time(start_time, end_time):
+    if start_time is not None and end_time is not None:
+        if start_time < end_time:
+            return False
+    return True
+
+
 def strip_empty_to_none(ipt: str) -> None | str:
     if ipt.strip() == "":
         return None

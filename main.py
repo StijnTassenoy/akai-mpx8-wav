@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QListView, QAbstractItemV
 from PyQt5 import QtGui
 
 from helpers.ffmpeg_helpers import edit_audio
-from helpers.helpers import validate_float_input, strip_empty_to_none, ytdl_download_soundtrack
+from helpers.helpers import validate_float_input, strip_empty_to_none, ytdl_download_soundtrack, validate_start_end_time
 from helpers.stylesheets import right_pane_style
 from models.sound_effect import SoundEffect
 
@@ -114,12 +114,14 @@ class MainWindow(QMainWindow):
         start_time = strip_empty_to_none(start_time)
         end_time = strip_empty_to_none(end_time)
 
-        if validate_float_input(start_time, "Start-time"):
-            soundeffect.start_time = start_time
-        if validate_float_input(end_time, "End-time"):
-            soundeffect.end_time = end_time
-
-        print(f"Saved: {soundeffect}")
+        if validate_start_end_time(start_time, end_time):
+            if validate_float_input(start_time, "Start-time"):
+                soundeffect.start_time = start_time
+            if validate_float_input(end_time, "End-time"):
+                soundeffect.end_time = end_time
+            print(f"Saved: {soundeffect}")
+        else:
+            QMessageBox.warning(None, "Error", f"Check start -and endtimes.")
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls():
