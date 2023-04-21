@@ -1,6 +1,6 @@
 import re
 import os
-import subprocess
+import yt_dlp
 
 from PyQt5.QtWidgets import QMessageBox
 
@@ -23,8 +23,19 @@ def strip_empty_to_none(ipt: str) -> None | str:
 
 
 def ytdl_download_soundtrack(url: str) -> str:
-    dl = subprocess.run(["yt-dlp", "-o", "./_temp/%(title)s.%(ext)s", "-x", "--audio-format", "wav", url], capture_output=True, text=True)
-    des = re.findall(r"\[ExtractAudio\] Destination: (.*?) \(pass -k to", str(dl))[0]
-    if "\\nDeleting original" in des:
-        des = des.split("\\nDeleting original")[0]
-    return os.path.normpath(des.strip())
+    ydl_opts = {
+        "format": "bestaudio/best",
+        "outtmpl": "./_temp/%(title)s.%(ext)s",
+        "postprocessors": [
+        {
+            "key": "FFmpegExtractAudio",
+            "preferredcodec": "wav",
+        }]
+    }
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        info_dict = ydl.extract_info(url, download=True)
+        file_pattern = ydl.prepare_filename(info_dict)
+        des = os.path.join(os.getcwd(), file_pattern)
+        if not des.endswith(".wav"):
+            des = os.path.splitext(des)[0] + ".wav"
+    return des

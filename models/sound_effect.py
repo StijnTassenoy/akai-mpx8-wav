@@ -1,6 +1,7 @@
 # Python Imports #
 import os
 from dataclasses import dataclass
+from PyQt5.QtGui import QStandardItem
 
 
 @dataclass
@@ -10,6 +11,7 @@ class SoundEffect:
     output_name: str
     start_time: int = None
     end_time: int = None
+    item: QStandardItem = None
 
     def generate_output_path(self):
         if self.output_name:
@@ -22,5 +24,5 @@ class SoundEffect:
         if not output_file_path.endswith(".wav"):
             output_file_path += ".wav"
         if "\\_temp\\" in output_file_path:
-            output_file_path = output_file_path.replace("_temp\\", "")
+            output_file_path = output_file_path.replace("_temp\\", "_output\\")
         return output_file_path

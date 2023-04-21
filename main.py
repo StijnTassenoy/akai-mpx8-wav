@@ -1,4 +1,6 @@
 import os
+import random
+
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QStandardItem, QStandardItemModel
 from PyQt5.QtWidgets import QApplication, QMainWindow, QListView, QAbstractItemView, QLabel, QWidget, \
@@ -69,8 +71,8 @@ class MainWindow(QMainWindow):
         self.right_pane.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.right_pane.setStyleSheet(right_pane_style)
         self.right_pane.clicked.connect(self.show_edit_pane)
-        self.model = QStandardItemModel(self.right_pane)
-        self.right_pane.setModel(self.model)
+        self.item_model = QStandardItemModel(self.right_pane)
+        self.right_pane.setModel(self.item_model)
 
     def _setup_pane_layout(self):
         # Create vertical layout for left pane and input field
@@ -137,7 +139,7 @@ class MainWindow(QMainWindow):
                 if path not in self.file_list:
                     self.file_list.append(path)
                     item = QStandardItem(os.path.basename(path))
-                    self.model.appendRow(item)
+                    self.item_model.appendRow(item)
                     soundeffect = SoundEffect(source_path=path, output_path="", output_name="")
                     self.soundeffect_list.append(soundeffect)
                     self._update_start_batch_button()  # Call this method to update the button state
@@ -147,9 +149,12 @@ class MainWindow(QMainWindow):
             name = self.yt_input.text().split("/watch?v=")[1]
             if "&" in name:
                 name = name.split("&")[0]
-            item = QStandardItem(name)
-            self.model.appendRow(item)
-            soundeffect = SoundEffect(source_path=self.yt_input.text(), output_path="./_output", output_name=name)
+            if self.item_model.findItems(name):
+                item = QStandardItem(f"{name}{random.randint(100, 999)}")
+            else:
+                item = QStandardItem(name)
+            self.item_model.appendRow(item)
+            soundeffect = SoundEffect(source_path=self.yt_input.text(), output_path="./_output", output_name=name, item=item)
             self.soundeffect_list.append(soundeffect)
             self._update_start_batch_button()
         else:
@@ -163,6 +168,13 @@ class MainWindow(QMainWindow):
                 yt_location = ytdl_download_soundtrack(se.source_path)
                 se.source_path = yt_location
             edit_audio(se.start_time, se.end_time, se.source_path, se.generate_output_path())
+            matches = self.item_model.findItems(se.item.text())
+            for item in matches:
+                if item:
+                    index = self.item_model.indexFromItem(item)
+                    if index.isValid():
+                        row = index.row()
+                        self.item_model.removeRow(row)
 
     def dropEvent(self, event):
         for url in event.mimeData().urls():
@@ -171,9 +183,13 @@ class MainWindow(QMainWindow):
             if os.path.isfile(path) and extension.lower() in ("wav", "mp3", "opus"):
                 if path not in self.file_list:
                     self.file_list.append(path)
-                    item = QStandardItem(os.path.basename(path))
-                    self.model.appendRow(item)
-                    soundeffect = SoundEffect(source_path=path, output_path="", output_name="")
+                    name = os.path.basename(path)
+                    if self.item_model.findItems(name):
+                        item = QStandardItem(f"{name}{random.randint(100, 999)}")
+                    else:
+                        item = QStandardItem(name)
+                    self.item_model.appendRow(item)
+                    soundeffect = SoundEffect(source_path=path, output_path="", output_name="", item=item)
                     self.soundeffect_list.append(soundeffect)
                     if len(self.file_list) > 0:
                         self.start_batch_button.setEnabled(True)
@@ -188,7 +204,7 @@ class MainWindow(QMainWindow):
         save_button = QPushButton("Save")
         save_button.clicked.connect(self.save_sound)
         edit_layout = QFormLayout()
-        name = self.model.itemFromIndex(index).text()
+        name = self.item_model.itemFromIndex(index).text()
         edit_layout.addRow("Name:", QLabel(name))
         output_name_input = QLineEdit()
         output_name_input.setObjectName("output_name_input")
